@@ -4,26 +4,36 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Download, Menu, X, Phone, Mail, MapPin,
-  Home, Info, GraduationCap, Wrench, ShoppingBag, MessageSquare,
+  Download,
+  Menu,
+  X,
+  Phone,
+  Mail,
+  MapPin,
+  Home,
+  Info,
+  GraduationCap,
+  Wrench,
+  ShoppingBag,
+  MessageSquare,
 } from "lucide-react";
 
 const navLinks = [
-  { href: "/#home",       label: "Home",        icon: Home },
-  { href: "/#about",      label: "About",       icon: Info },
-  { href: "/#courses",    label: "Courses",     icon: GraduationCap },
-  { href: "/#services",   label: "Services",    icon: Wrench },
+  { href: "/#home", label: "Home", icon: Home },
+  { href: "/#about", label: "About", icon: Info },
+  { href: "/#courses", label: "Courses", icon: GraduationCap },
+  { href: "/#services", label: "Services", icon: Wrench },
   { href: "/accessories", label: "Accessories", icon: ShoppingBag },
-  { href: "/#contact",    label: "Contact",     icon: MessageSquare },
+  { href: "/#contact", label: "Contact", icon: MessageSquare },
 ];
 
 export default function Header() {
-  const [menuOpen, setMenuOpen]   = useState(false);
-  const [scrolled, setScrolled]   = useState(false);
-  const [hidden, setHidden]       = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [activeLink, setActiveLink] = useState("/#home");
-  const lastScrollY               = useRef(0);
-  const isUserClickingRef          = useRef(false);
+  const lastScrollY = useRef(0);
+  const isUserClickingRef = useRef(false);
 
   useEffect(() => {
     // Handle hash changes from clicking nav links
@@ -33,7 +43,7 @@ export default function Header() {
       const hash = window.location.hash || (path === "/" ? "#home" : "");
       const current = `${path}${hash}`;
       setActiveLink(current === "/" ? "/#home" : current);
-      
+
       // Allow scroll-based updates to resume after a short delay
       setTimeout(() => {
         isUserClickingRef.current = false;
@@ -46,7 +56,8 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined" || window.location.pathname !== "/") return;
+    if (typeof window === "undefined" || window.location.pathname !== "/")
+      return;
 
     const sectionIds = ["home", "about", "courses", "services", "contact"];
     const sections = sectionIds
@@ -69,7 +80,7 @@ export default function Header() {
           setActiveLink(`/#${inViewport[0].target.id}`);
         }
       },
-      { threshold: [0, 0.25, 0.5, 0.75, 1] }
+      { threshold: [0, 0.25, 0.5, 0.75, 1] },
     );
 
     sections.forEach((section) => observer.observe(section));
@@ -90,14 +101,18 @@ export default function Header() {
 
   /* ── keyboard + body-scroll lock ── */
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [menuOpen]);
 
   const close = () => setMenuOpen(false);
@@ -116,9 +131,12 @@ export default function Header() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[70px]">
-
             {/* Brand */}
-            <Link href="/" className="flex items-center gap-3 group shrink-0" onClick={close}>
+            <Link
+              href="/"
+              className="flex items-center gap-3 group shrink-0"
+              onClick={close}
+            >
               <Image
                 src="/images/logo1.png"
                 alt="Modem Computer Technology Logo"
@@ -178,13 +196,23 @@ export default function Header() {
               >
                 <span
                   className="absolute transition-all duration-300"
-                  style={{ opacity: menuOpen ? 0 : 1, transform: menuOpen ? "rotate(90deg) scale(0.5)" : "rotate(0deg) scale(1)" }}
+                  style={{
+                    opacity: menuOpen ? 0 : 1,
+                    transform: menuOpen
+                      ? "rotate(90deg) scale(0.5)"
+                      : "rotate(0deg) scale(1)",
+                  }}
                 >
                   <Menu size={22} />
                 </span>
                 <span
                   className="absolute transition-all duration-300"
-                  style={{ opacity: menuOpen ? 1 : 0, transform: menuOpen ? "rotate(0deg) scale(1)" : "rotate(-90deg) scale(0.5)" }}
+                  style={{
+                    opacity: menuOpen ? 1 : 0,
+                    transform: menuOpen
+                      ? "rotate(0deg) scale(1)"
+                      : "rotate(-90deg) scale(0.5)",
+                  }}
                 >
                   <X size={22} />
                 </span>
@@ -229,7 +257,10 @@ export default function Header() {
         </div>
 
         {/* Nav links */}
-        <nav aria-label="Mobile navigation" className="flex-1 overflow-y-auto px-3 py-4">
+        <nav
+          aria-label="Mobile navigation"
+          className="flex-1 overflow-y-auto px-3 py-4"
+        >
           <ul className="space-y-1">
             {navLinks.map(({ href, label, icon: Icon }, i) => {
               const isActive = href === activeLink;
@@ -248,7 +279,9 @@ export default function Header() {
                     onClick={close}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-blue-50 hover:text-blue-600"}`}
                   >
-                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${isActive ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600"}`}>
+                    <span
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${isActive ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600"}`}
+                    >
                       <Icon size={15} />
                     </span>
                     <span className="font-medium text-sm">{label}</span>
@@ -289,17 +322,25 @@ export default function Header() {
         <div
           className="border-t border-slate-100 px-5 py-4 bg-slate-50 space-y-2.5"
           style={{
-            transitionDelay: menuOpen ? `${(navLinks.length + 1) * 45}ms` : "0ms",
+            transitionDelay: menuOpen
+              ? `${(navLinks.length + 1) * 45}ms`
+              : "0ms",
             transform: menuOpen ? "translateY(0)" : "translateY(12px)",
             opacity: menuOpen ? 1 : 0,
             transition: "transform 0.3s ease, opacity 0.3s ease",
           }}
         >
-          <a href="tel:+2348032310325" className="flex items-center gap-2.5 text-xs text-slate-500 hover:text-blue-600 transition-colors">
+          <a
+            href="tel:+2348032310325"
+            className="flex items-center gap-2.5 text-xs text-slate-500 hover:text-blue-600 transition-colors"
+          >
             <Phone size={13} className="text-blue-400 shrink-0" />
             +234 803 231 0325
           </a>
-          <a href="mailto:modemcomputers247@gmail.com" className="flex items-center gap-2.5 text-xs text-slate-500 hover:text-blue-600 transition-colors break-all">
+          <a
+            href="mailto:modemcomputers247@gmail.com"
+            className="flex items-center gap-2.5 text-xs text-slate-500 hover:text-blue-600 transition-colors break-all"
+          >
             <Mail size={13} className="text-blue-400 shrink-0" />
             modemcomputers247@gmail.com
           </a>
