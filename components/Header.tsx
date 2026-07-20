@@ -21,7 +21,60 @@ export default function Header() {
   const [menuOpen, setMenuOpen]   = useState(false);
   const [scrolled, setScrolled]   = useState(false);
   const [hidden, setHidden]       = useState(false);
+  const [activeLink, setActiveLink] = useState("/#home");
   const lastScrollY               = useRef(0);
+  const isUserClickingRef          = useRef(false);
+
+  useEffect(() => {
+    // Handle hash changes from clicking nav links
+    const updateActiveLink = () => {
+      isUserClickingRef.current = true;
+      const path = window.location.pathname || "/";
+      const hash = window.location.hash || (path === "/" ? "#home" : "");
+      const current = `${path}${hash}`;
+      setActiveLink(current === "/" ? "/#home" : current);
+      
+      // Allow scroll-based updates to resume after a short delay
+      setTimeout(() => {
+        isUserClickingRef.current = false;
+      }, 500);
+    };
+
+    updateActiveLink();
+    window.addEventListener("hashchange", updateActiveLink);
+    return () => window.removeEventListener("hashchange", updateActiveLink);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || window.location.pathname !== "/") return;
+
+    const sectionIds = ["home", "about", "courses", "services", "contact"];
+    const sections = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+
+    if (!sections.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isUserClickingRef.current) return;
+
+        const viewportTop = window.innerHeight * 0.25;
+        const inViewport = entries.filter((entry) => {
+          const rect = entry.target.getBoundingClientRect();
+          return rect.top <= viewportTop && rect.bottom > viewportTop;
+        });
+
+        if (inViewport.length > 0) {
+          setActiveLink(`/#${inViewport[0].target.id}`);
+        }
+      },
+      { threshold: [0, 0.25, 0.5, 0.75, 1] }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
 
   /* ── scroll behaviour ── */
   useEffect(() => {
@@ -87,13 +140,19 @@ export default function Header() {
             {/* Desktop nav */}
             <nav aria-label="Main navigation" className="hidden lg:block">
               <ul className="flex items-center gap-1">
-                {navLinks.map(({ href, label }) => (
-                  <li key={href}>
-                    <Link href={href} className="px-3 py-2 text-sm font-medium text-slate-700 rounded-lg hover:text-blue-600 hover:bg-blue-50 transition-all">
-                      {label}
-                    </Link>
-                  </li>
-                ))}
+                {navLinks.map(({ href, label }) => {
+                  const isActive = href === activeLink;
+                  return (
+                    <li key={href}>
+                      <Link
+                        href={href}
+                        className={`px-3 py-2 text-sm rounded-lg transition-all ${isActive ? "font-semibold text-blue-600 bg-blue-50" : "font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50"}`}
+                      >
+                        {label}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
 
@@ -172,28 +231,31 @@ export default function Header() {
         {/* Nav links */}
         <nav aria-label="Mobile navigation" className="flex-1 overflow-y-auto px-3 py-4">
           <ul className="space-y-1">
-            {navLinks.map(({ href, label, icon: Icon }, i) => (
-              <li
-                key={href}
-                style={{
-                  transitionDelay: menuOpen ? `${i * 45}ms` : "0ms",
-                  transform: menuOpen ? "translateX(0)" : "translateX(24px)",
-                  opacity: menuOpen ? 1 : 0,
-                  transition: "transform 0.3s ease, opacity 0.3s ease",
-                }}
-              >
-                <Link
-                  href={href}
-                  onClick={close}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors group"
+            {navLinks.map(({ href, label, icon: Icon }, i) => {
+              const isActive = href === activeLink;
+              return (
+                <li
+                  key={href}
+                  style={{
+                    transitionDelay: menuOpen ? `${i * 45}ms` : "0ms",
+                    transform: menuOpen ? "translateX(0)" : "translateX(24px)",
+                    opacity: menuOpen ? 1 : 0,
+                    transition: "transform 0.3s ease, opacity 0.3s ease",
+                  }}
                 >
-                  <span className="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center shrink-0 transition-colors">
-                    <Icon size={15} className="text-slate-500 group-hover:text-blue-600 transition-colors" />
-                  </span>
-                  <span className="font-medium text-sm">{label}</span>
-                </Link>
-              </li>
-            ))}
+                  <Link
+                    href={href}
+                    onClick={close}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive ? "bg-blue-50 text-blue-700" : "text-slate-700 hover:bg-blue-50 hover:text-blue-600"}`}
+                  >
+                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${isActive ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600"}`}>
+                      <Icon size={15} />
+                    </span>
+                    <span className="font-medium text-sm">{label}</span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
 
           {/* Divider */}
