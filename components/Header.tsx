@@ -62,7 +62,7 @@ export default function Header() {
     const sectionIds = ["home", "about", "courses", "services", "contact"];
     const sections = sectionIds
       .map((id) => document.getElementById(id))
-      .filter(Boolean);
+      .filter((section): section is HTMLElement => section !== null);
 
     if (!sections.length) return;
 
